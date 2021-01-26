@@ -5,6 +5,8 @@ import os
 import matplotlib.pyplot as plt
 import argparse
 from skimage.transform import resize as imresize
+from skimage.io import imread
+from skimage.color import gray2rgb
 import scipy.ndimage
 from utils import now
 from travelgan import TravelGAN
@@ -19,12 +21,30 @@ def get_data_imagenet(datadirb1, datadirb2, D=128):
     b2 = sorted(glob.glob('{}/*'.format(datadirb2)))
     b1 = [fn for fn in b1 if any(['png' in fn.lower(), 'jpeg' in fn.lower(), 'jpg' in fn.lower()])]
     b2 = [fn for fn in b2 if any(['png' in fn.lower(), 'jpeg' in fn.lower(), 'jpg' in fn.lower()])]
-
-    b1 = [scipy.misc.imresize(scipy.ndimage.imread(f), (D, D)) for f in b1]
-    b2 = [scipy.misc.imresize(scipy.ndimage.imread(f), (D, D)) for f in b2]
-    b1 = [im for im in b1 if len(im.shape) == 3]
-    b2 = [im for im in b2 if len(im.shape) == 3]
-
+    
+    b1 = [imresize(imread(f), (D, D)) for f in b1]
+    b2 = [imresize(imread(f), (D, D)) for f in b2]
+    
+    #b1 = [im for im in b1 if len(im.shape) == 3]
+    #b2 = [im for im in b2 if len(im.shape) == 3]
+    b1 = [im for im in b1]
+    b2 = [im for im in b2]
+    
+    ind = 0
+    for im in b1:
+        if len(im.shape) == 2:
+            b1[ind] = gray2rgb(im)
+        ind = ind+1
+        
+    ind = 0
+    for im in b2:
+        if len(im.shape) == 2:
+            b2[ind] = gray2rgb(im)
+        ind = ind+1
+        
+    print(b1[0].shape)
+    print(b2[0].shape)
+    
     b1 = np.stack(b1, axis=0)
     b2 = np.stack(b2, axis=0)
 
